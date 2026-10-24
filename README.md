@@ -5,6 +5,7 @@ A single-file productivity dashboard for daily tasks, alarms, learning tracks, n
 ## GitHub Pages
 
 The site is deployed from `index.html` by the GitHub Actions workflow in `.github/workflows/pages.yml`.
+On first setup, GitHub may require an owner to enable Pages in **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Then rerun the **Deploy to GitHub Pages** workflow from the **Actions** tab.
 
 ## Privacy
 
