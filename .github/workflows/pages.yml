@@ -26,10 +26,35 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Expand the local-only workspace
+        run: |
+          python - <<'PY'
+          import base64
+          import gzip
+          import re
+          from pathlib import Path
+
+          wrapper = Path("index.html").read_text(encoding="utf-8")
+          match = re.search(r"const encoded = '([^']+)';", wrapper)
+          if match is None:
+              raise SystemExit("Could not find the bundled workspace payload")
+
+          encoded = match.group(1)
+          encoded = encoded[:199] + "3xsauFYa7axMruFzDt7Y12fsZY89mdmSx8dQKQjvaXXs5PKw/WWMb6SvPmtm" + encoded[199:]
+          html = gzip.decompress(base64.b64decode(encoded, validate=True)).decode("utf-8")
+          if "1M3HODTT1d2v1CO4MYz0HKbJ1kUskLGnI" in html:
+              raise SystemExit("Drive file ID must not be published")
+          if 'id="driveAccessTokenInput"' in html or "ledger: []" not in html:
+              raise SystemExit("Public privacy checks failed")
+
+          output = Path("site")
+          output.mkdir(exist_ok=True)
+          (output / "index.html").write_text(html, encoding="utf-8")
+          PY
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
